@@ -1,6 +1,7 @@
 ﻿using Domain.Data.Entities;
 using Domain.DTOs;
 using Domain.DTOs.Order;
+using Application.DTOs.Admin.Dashboard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,5 +24,10 @@ namespace Domain.Interface
         Task<PagedResult<OrderDto>> GetPagedOrdersAsync(OrderFillterDto filter, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
         Task<Order> GetByIdAsync(Guid orderId, CancellationToken cancellationToken); // ko include
+
+        // Dashboard methods
+        Task<List<Order>> GetOrdersInRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken);
+        Task<List<TopProductDTO>> GetTopProductsInRangeAsync(DateTime startDate, DateTime endDate, int take, CancellationToken cancellationToken);
+        Task<List<TopCustomerDTO>> GetTopCustomersInRangeAsync(DateTime startDate, DateTime endDate, int take, CancellationToken cancellationToken);
     }
 }

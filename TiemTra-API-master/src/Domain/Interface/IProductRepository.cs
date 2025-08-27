@@ -22,7 +22,8 @@ namespace Domain.Interface
         Task UpdateQuantityAsync(Guid productId, CancellationToken cancellationToken);
         Task UpdateSoldQuantityAsync(Guid productId, int soldQuantity, CancellationToken cancellationToken);
 
-
+        // Dashboard methods
+        Task<int> GetTotalActiveProductsAsync(CancellationToken cancellationToken);
 
         /// <summary> Store 
         /// 

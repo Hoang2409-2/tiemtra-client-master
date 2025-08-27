@@ -196,5 +196,12 @@ namespace Infrastructure.Repositories
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task<int> GetTotalActiveProductsAsync(CancellationToken cancellationToken)
+        {
+            return await _dbContext.Products
+                .Where(p => p.ProductStatus == ProductStatus.Active)
+                .CountAsync(cancellationToken);
+        }
+
     }
 }

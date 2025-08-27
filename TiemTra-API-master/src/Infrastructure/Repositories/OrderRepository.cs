@@ -4,6 +4,8 @@ using Domain.DTOs.Order;
 using Domain.Interface;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using Application.DTOs.Admin.Dashboard;
+using Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,6 +136,62 @@ namespace Infrastructure.Repositories
         public async Task<Order> GetByIdAsync(Guid orderId, CancellationToken cancellationToken)
         {
             return await _dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId, cancellationToken);
+        }
+
+        // Dashboard methods implementation
+        public async Task<List<Order>> GetOrdersInRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<TopProductDTO>> GetTopProductsInRangeAsync(DateTime startDate, DateTime endDate, int take, CancellationToken cancellationToken)
+        {
+            return await _dbContext.OrderItems
+                .Include(oi => oi.Order)
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Order.CreatedAt >= startDate && 
+                            oi.Order.CreatedAt <= endDate &&
+                            oi.Order.OrderStatus == OrderStatus.Delivered)
+                .GroupBy(oi => new { oi.ProductId, oi.Product.ProductName })
+                .Select(g => new TopProductDTO
+                {
+                    ProductId = g.Key.ProductId,
+                    ProductName = g.Key.ProductName,
+                    TotalSold = g.Sum(oi => oi.Quantity),
+                    TotalRevenue = g.Sum(oi => oi.Quantity * oi.UnitPrice)
+                })
+                .OrderByDescending(p => p.TotalSold)
+                .Take(take)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<TopCustomerDTO>> GetTopCustomersInRangeAsync(DateTime startDate, DateTime endDate, int take, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Orders
+                .Include(o => o.Customer)
+                .Where(o => o.CreatedAt >= startDate && 
+                           o.CreatedAt <= endDate &&
+                           o.OrderStatus == OrderStatus.Delivered)
+                .GroupBy(o => new { o.CustomerId, o.Customer.CustomerName, o.Customer.Email })
+                .Select(g => new TopCustomerDTO
+                {
+                    CustomerId = g.Key.CustomerId,
+                    CustomerName = g.Key.CustomerName,
+                    Email = g.Key.Email,
+                    TotalOrders = g.Count(),
+                    TotalSpent = g.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(c => c.TotalSpent)
+                .Take(take)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
     }
 }
