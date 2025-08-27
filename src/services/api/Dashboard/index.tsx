@@ -1,4 +1,10 @@
-import axiosInstance from '../extended/axiosInstance';
+import axiosInstance from '../../extended/axiosInstance';
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
 
 export interface DashboardFilterType {
   filterType: 1 | 2 | 3 | 4 | 5; // Today, SevenDays, ThisMonth, LastMonth, Custom
@@ -47,23 +53,23 @@ export interface TopCustomer {
 const DashboardAPI = {
   // Lấy tổng quan thống kê
   getStats: (filter: DashboardFilterType) => 
-    axiosInstance.get<DashboardStats>('/api/admin/dashboard/stats', { params: filter }),
+    axiosInstance.get<ApiResponse<DashboardStats>>('/api/admin/dashboard/stats', { params: filter }),
 
   // Lấy biểu đồ doanh thu
   getRevenueChart: (filter: DashboardFilterType) => 
-    axiosInstance.get<DailyRevenue[]>('/api/admin/dashboard/revenue-chart', { params: filter }),
+    axiosInstance.get<ApiResponse<DailyRevenue[]>>('/api/admin/dashboard/revenue-chart', { params: filter }),
 
   // Lấy thống kê trạng thái đơn hàng
   getOrderStatusStats: (filter: DashboardFilterType) => 
-    axiosInstance.get<OrderStatusStats[]>('/api/admin/dashboard/order-status-stats', { params: filter }),
+    axiosInstance.get<ApiResponse<OrderStatusStats[]>>('/api/admin/dashboard/order-status-stats', { params: filter }),
 
   // Lấy top sản phẩm
   getTopProducts: (filter: DashboardFilterType) => 
-    axiosInstance.get<TopProduct[]>('/api/admin/dashboard/top-products', { params: filter }),
+    axiosInstance.get<ApiResponse<TopProduct[]>>('/api/admin/dashboard/top-products', { params: filter }),
 
   // Lấy top khách hàng
   getTopCustomers: (filter: DashboardFilterType) => 
-    axiosInstance.get<TopCustomer[]>('/api/admin/dashboard/top-customers', { params: filter }),
+    axiosInstance.get<ApiResponse<TopCustomer[]>>('/api/admin/dashboard/top-customers', { params: filter }),
 };
 
 export default DashboardAPI;

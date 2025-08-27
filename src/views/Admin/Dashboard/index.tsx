@@ -58,8 +58,11 @@ const Dashboard = () => {
       const filter = getFilterType(range);
       const response = await DashboardAPI.getStats(filter);
       
+      // Response structure: { data: { success: boolean, message: string, data: DashboardStats } }
       if (response.data.success) {
         setDashboardData(response.data.data);
+      } else {
+        console.error('API Error:', response.data.message);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
